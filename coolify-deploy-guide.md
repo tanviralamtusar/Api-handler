@@ -50,6 +50,7 @@ Go to the **Environment Variables** tab in Coolify and paste the following keys:
 | :--- | :--- | :--- |
 | `PORT` | `3001` | The internal port the server listens on |
 | `SQLITE_DB_PATH` | `/data/database.sqlite` | **Crucial:** Directs SQLite to save the DB inside our persistent volume! |
+| `NIXPACKS_NODE_VERSION` | `20` | **Crucial:** Tells Nixpacks to build with Node 20+, which is required for `better-sqlite3` |
 | `GOOGLE_CLOUD_API_KEY` | `your-gemini-key` | Your Google Vertex/Gemini API Key |
 | `GROQ_API_KEY` | `your-groq-key` | Your Groq API Key (for Lite Engine) |
 
