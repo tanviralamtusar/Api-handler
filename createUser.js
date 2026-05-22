@@ -1,9 +1,11 @@
+require('dotenv').config();
 const Database = require('better-sqlite3');
 const crypto = require('crypto');
 const path = require('path');
 const readline = require('readline');
 
-const db = new Database(path.join(__dirname, 'database.sqlite'));
+const dbPath = process.env.SQLITE_DB_PATH || path.join(__dirname, 'database.sqlite');
+const db = new Database(dbPath);
 
 // Ensure the new 'name' column exists in 'user_configs' (migration safety)
 try {
