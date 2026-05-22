@@ -156,7 +156,7 @@ exports.handleChatCompletion = async (req, res) => {
             }
 
         } else {
-            const replyText = await vertexEngineService.processRequest({
+            const result = await vertexEngineService.processRequest({
                 message: userMessage,
                 history: cleanHistory,
                 systemPrompt: systemPrompt,
@@ -164,14 +164,22 @@ exports.handleChatCompletion = async (req, res) => {
                 stream: false
             });
 
+            const replyText = result.text;
+            const reasoningText = result.reasoning;
+
             // 5. Calculate Usage (Approximation)
             const promptTokens = Math.ceil((userMessage.length + systemPrompt.length) / 3.5);
-            const completionTokens = Math.ceil(replyText.length / 3.5);
+            const completionTokens = Math.ceil((replyText.length + reasoningText.length) / 3.5);
             const totalTokens = promptTokens + completionTokens;
 
             await dbService.logApiUsage(userConfig.user_id, targetModel, totalTokens, 0);
 
             // 7. Format Response
+            const messagePayload = { role: 'assistant', content: replyText };
+            if (reasoningText) {
+                messagePayload.reasoning_content = reasoningText;
+            }
+
             const response = {
                 id: `chatcmpl-${crypto.randomUUID()}`,
                 object: 'chat.completion',
@@ -179,7 +187,7 @@ exports.handleChatCompletion = async (req, res) => {
                 model: targetModel, 
                 choices: [{
                     index: 0,
-                    message: { role: 'assistant', content: replyText },
+                    message: messagePayload,
                     finish_reason: 'stop'
                 }],
                 usage: {

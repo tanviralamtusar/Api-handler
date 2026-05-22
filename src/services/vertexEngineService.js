@@ -85,7 +85,26 @@ class VertexEngineService {
             const resp = await chat.sendMessage({
                 message: message
             });
-            return resp.text;
+
+            let text = "";
+            let reasoning = "";
+
+            const parts = resp.candidates?.[0]?.content?.parts || [];
+            for (const part of parts) {
+                if (typeof part.text === 'string') {
+                    if (part.thought === true) {
+                        reasoning += part.text;
+                    } else {
+                        text += part.text;
+                    }
+                }
+            }
+
+            return {
+                text: text,
+                reasoning: reasoning,
+                response: resp
+            };
         }
     }
 }

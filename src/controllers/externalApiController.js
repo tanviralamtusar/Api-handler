@@ -155,6 +155,7 @@ exports.handleChatCompletion = async (req, res) => {
 
         // 4. ROUTING LOGIC based on Model Name
         let aiText = "";
+        let aiReasoning = "";
         let totalTokens = 0;
         let responseModelName = "freeapi-pro"; // Default to Pro
         let billingLabel = "Cheap Engine API Call";
@@ -342,9 +343,10 @@ exports.handleChatCompletion = async (req, res) => {
                 }
             }
 
-            aiText = cleanAiText(result);
+            aiText = cleanAiText(result.text);
+            aiReasoning = result.reasoning || "";
             const promptTokens = Math.ceil((userMessage.length + (systemPrompt?.length || 0)) / 3.5);
-            const completionTokens = Math.ceil(aiText.length / 3.5);
+            const completionTokens = Math.ceil((aiText.length + aiReasoning.length) / 3.5);
             totalTokens = promptTokens + completionTokens;
 
         } else {
@@ -407,7 +409,8 @@ exports.handleChatCompletion = async (req, res) => {
                     index: 0,
                     message: {
                         role: 'assistant',
-                        content: aiText
+                        content: aiText,
+                        ...(aiReasoning ? { reasoning_content: aiReasoning } : {})
                     },
                     finish_reason: 'stop'
                 }
