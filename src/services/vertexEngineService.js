@@ -2,12 +2,21 @@ const { GoogleGenAI } = require('@google/genai');
 
 class VertexEngineService {
     constructor() {
-        // Initialize Vertex with your Cloud project and location
-        this.ai = new GoogleGenAI({
-            vertexai: true,
-            project: process.env.VERTEX_PROJECT_ID || 'project-83d1ec52-ca5c-420c-964',
-            location: process.env.VERTEX_LOCATION || 'global' // Set to 'global' since you are using a 3.1 model!
-        });
+        // Initialize Vertex: use Express Mode if GOOGLE_CLOUD_API_KEY is defined, otherwise fall back to standard IAM ADC
+        if (process.env.GOOGLE_CLOUD_API_KEY) {
+            console.log('[VertexEngine] Initializing Vertex AI in Express Mode (API Key)');
+            this.ai = new GoogleGenAI({
+                vertexai: true,
+                apiKey: process.env.GOOGLE_CLOUD_API_KEY
+            });
+        } else {
+            console.log('[VertexEngine] Initializing Vertex AI in standard GCP ADC Mode');
+            this.ai = new GoogleGenAI({
+                vertexai: true,
+                project: process.env.VERTEX_PROJECT_ID || 'project-83d1ec52-ca5c-420c-964',
+                location: process.env.VERTEX_LOCATION || 'global' // Set to 'global' since you are using a 3.1 model!
+            });
+        }
 
         const tools = [
             {
