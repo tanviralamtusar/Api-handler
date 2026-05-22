@@ -1,2 +1,4 @@
+# Install build tools via apt (alongside the auto-detected Node.js from Nix)
+# Required for better-sqlite3 native compilation via node-gyp
 [phases.setup]
-nixPkgs = ["python3", "gnumake", "gcc"]
+aptPkgs = ["python3", "make", "g++"]
