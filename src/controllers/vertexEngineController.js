@@ -73,27 +73,64 @@ exports.handleChatCompletion = async (req, res) => {
             res.setHeader('Cache-Control', 'no-cache');
             res.setHeader('Connection', 'keep-alive');
 
+            // Write the initial role chunk to satisfy strict OpenAI-compatible clients (like Roo Code)
+            const initialData = {
+                id: responseId,
+                object: 'chat.completion.chunk',
+                created: created,
+                model: targetModel,
+                choices: [
+                    {
+                        index: 0,
+                        delta: { role: 'assistant' },
+                        finish_reason: null
+                    }
+                ]
+            };
+            res.write(`data: ${JSON.stringify(initialData)}\n\n`);
+
             let fullText = "";
+            let fullReasoning = "";
 
             try {
                 for await (const chunk of streamingResp) {
-                    const content = chunk.text || "";
-                    fullText += content;
+                    let content = "";
+                    let reasoning = "";
                     
-                    const data = {
-                        id: responseId,
-                        object: 'chat.completion.chunk',
-                        created: created,
-                        model: targetModel,
-                        choices: [
-                            {
-                                index: 0,
-                                delta: { content: content },
-                                finish_reason: null
+                    const parts = chunk.candidates?.[0]?.content?.parts || [];
+                    for (const part of parts) {
+                        if (typeof part.text === 'string') {
+                            if (part.thought === true) {
+                                reasoning += part.text;
+                            } else {
+                                content += part.text;
                             }
-                        ]
-                    };
-                    res.write(`data: ${JSON.stringify(data)}\n\n`);
+                        }
+                    }
+                    
+                    fullText += content;
+                    fullReasoning += reasoning;
+                    
+                    if (content || reasoning) {
+                        const delta = {};
+                        if (content) delta.content = content;
+                        if (reasoning) delta.reasoning_content = reasoning;
+
+                        const data = {
+                            id: responseId,
+                            object: 'chat.completion.chunk',
+                            created: created,
+                            model: targetModel,
+                            choices: [
+                                {
+                                    index: 0,
+                                    delta: delta,
+                                    finish_reason: null
+                                }
+                            ]
+                        };
+                        res.write(`data: ${JSON.stringify(data)}\n\n`);
+                    }
                 }
 
                 // Final chunk
