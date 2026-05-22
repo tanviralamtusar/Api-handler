@@ -64,6 +64,9 @@ Coolify uses **Nixpacks** by default, which automatically detects your `package.
 3. Under **Domain**, enter your preferred domain (e.g. `api.yourdomain.com`). Coolify will automatically request a Let's Encrypt SSL certificate and set up HTTP to HTTPS redirection!
 4. Click **Deploy**.
 
+> [!NOTE]
+> We have included a **[`nixpacks.toml`](file:///d:/Coding/Api%20handler/nixpacks.toml)** file in the repository root. This tells Coolify's build engine to automatically install `python3`, `gnumake`, and `gcc` during setup, enabling the SQLite driver (`better-sqlite3`) to compile successfully without any manual server intervention!
+
 ---
 
 ## Step 5: Run Seeder / Register Users
