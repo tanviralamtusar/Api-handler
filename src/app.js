@@ -8,12 +8,18 @@ const externalApiRoutes = require('./routes/externalApiRoutes');
 const liteEngineRoutes = require('./routes/liteEngineRoutes'); // New Lite Engine
 const openrouterEngineRoutes = require('./routes/openrouterEngineRoutes'); // New OpenRouter Engine
 const vertexEngineRoutes = require('./routes/vertexEngineRoutes'); // New Vertex Engine
+const { fccProxy, FCC_MOUNT_PATH } = require('./middleware/fccProxy'); // Bundled free-claude-code proxy
 
 const app = express();
 
 
 // Middleware
 app.use(cors());
+
+// free-claude-code passthrough — MUST be mounted before express.json() so that
+// request bodies (and streaming SSE responses) are forwarded untouched.
+app.use(FCC_MOUNT_PATH, fccProxy);
+
 app.use(express.json());
 
 // Routes

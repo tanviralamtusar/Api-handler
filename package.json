@@ -4,7 +4,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node index.js"
+    "dev": "node index.js",
+    "fcc": "cd free-claude-code && uv run fcc-server",
+    "fcc:setup": "cd free-claude-code && uv sync",
+    "dev:all": "concurrently -n node,fcc -c blue,magenta \"npm run dev\" \"npm run fcc\"",
+    "start:all": "pm2-runtime start ecosystem.config.js"
   },
   "dependencies": {
     "@google/genai": "^2.5.0",
@@ -13,10 +17,15 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "http-proxy-middleware": "^4.2.0",
     "morgan": "^1.10.1",
-    "openai": "^6.38.0"
+    "openai": "^6.38.0",
+    "pm2": "^7.0.3"
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
   }
 }
